@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+.turbo
+*.tsbuildinfo
+*.local
+.env
+.env.*
+docs
+specs
