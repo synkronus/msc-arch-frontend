@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { Box, Text, Card, Group } from "@mantine/core";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from "recharts";
 import { useApp, selectTenantOrders, selectTenantBookings } from "@smartgarage/store";
 import { computeKpis, can, ORDER_STATES, type Role } from "@smartgarage/contracts";
 import { KpiCard, cop, STATUS_STYLE, STATUS_LABEL } from "@smartgarage/ui";
@@ -19,6 +18,7 @@ export function Dashboard() {
     full: s,
     n: orders.filter((o) => o.estado === s).length,
   }));
+  const maxN = Math.max(1, ...chartData.map((d) => d.n));
 
   return (
     <Box px="md" pt="sm" pb={64}>
@@ -54,20 +54,46 @@ export function Dashboard() {
             {kpis.activas} activas
           </Text>
         </Group>
-        <Box style={{ width: "100%", height: 150 }}>
-          <ResponsiveContainer>
-            <BarChart data={chartData} margin={{ top: 6, right: 6, left: -22, bottom: 0 }}>
-              <XAxis dataKey="estado" tick={{ fontSize: 9, fill: "#64748B" }} interval={0} />
-              <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: "#94A3B8" }} />
-              <Tooltip />
-              <Bar dataKey="n" radius={[4, 4, 0, 0]}>
-                {chartData.map((d) => (
-                  <Cell key={d.full} fill={STATUS_STYLE[d.full].fg} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </Box>
+        <Group align="flex-end" gap={6} style={{ height: 120, alignItems: "flex-end" }}>
+          {chartData.map((d) => (
+            <Box
+              key={d.full}
+              style={{ flex: 1, height: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+              title={`${STATUS_LABEL[d.full]}: ${d.n}`}
+            >
+              <Box
+                style={{
+                  width: "60%",
+                  height: d.n === 0 ? 2 : Math.max(6, (d.n / maxN) * 110),
+                  background: STATUS_STYLE[d.full].fg,
+                  borderRadius: "4px 4px 0 0",
+                }}
+              />
+            </Box>
+          ))}
+        </Group>
+        <Group gap={6} mt={4}>
+          {chartData.map((d) => (
+            <Box key={d.full} style={{ flex: 1, textAlign: "center" }}>
+              <Text size="9px" fw={600} c="dimmed">
+                {d.n}
+              </Text>
+            </Box>
+          ))}
+        </Group>
+        <Group gap={6}>
+          {chartData.map((d) => (
+            <Box key={d.full} style={{ flex: 1, textAlign: "center" }}>
+              <Text
+                size="8px"
+                c="dimmed"
+                style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+              >
+                {d.estado}
+              </Text>
+            </Box>
+          ))}
+        </Group>
       </Card>
     </Box>
   );
