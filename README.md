@@ -67,11 +67,25 @@ Components read selectors and call store actions only; store actions call `api`;
 
 ## Tech stack
 
-Node 20 · pnpm 9 · turbo 2 · TypeScript 5.9 (strict) · React 18.3 · Zustand 4 · Zod 3 · Mantine v7 · Vite 5 · vite-plugin-pwa · recharts 2 · react-router-dom 6 (cliente) · Vitest 2 + Testing Library.
+Node 20 · pnpm 9 · turbo 2 · TypeScript 5.9 (strict) · React 18.3 · Zustand 4 · Zod 3 · Mantine v7 · Vite 5 · vite-plugin-pwa · @module-federation/vite (U4 shell + remotes) · react-router-dom 6 (cliente) · Vitest 2 + Testing Library.
 
 ## Deploy
 
 Each app is its own Vercel project (Root Directory `apps/cliente` / `apps/taller`; the build runs `pnpm turbo run build --filter=<app>...` to build the app and its workspace deps). Set `VITE_API_MODE` in the Vercel project env. SPA fallback is configured in each app's `vercel.json`.
+
+## Microfrontends (U4)
+
+`apps/shell` is a Module Federation **host** that composes the two apps as client-side **remotes** (`cliente`, `taller`), sharing the spine as singletons — one React, one Mantine theme, one `useApp` session across host and remotes. The shell owns session + navigation (no business logic); taller roles are selected at login via `setRole`. Domains: `cliente` (customer experience), `taller` (workshop ops — all four workshop roles share it), plus disabled roadmap nav for `facturación`/`analítica`. Rationale: `docs/U4_ARCHITECTURE.md`.
+
+Run the composed app locally (remotes on fixed preview ports, shell on 5000):
+
+```bash
+pnpm --filter @smartgarage/cliente build && (cd apps/cliente && pnpm exec vite preview --port 5001 --strictPort &)
+pnpm --filter @smartgarage/taller  build && (cd apps/taller  && pnpm exec vite preview --port 5002 --strictPort &)
+pnpm --filter @smartgarage/shell dev    # → http://localhost:5000
+```
+
+Remote URLs come from `VITE_REMOTE_CLIENTE` / `VITE_REMOTE_TALLER` (see `apps/shell/.env.example`; localhost previews are the fallback). Each remote also still runs standalone.
 
 ## CI
 

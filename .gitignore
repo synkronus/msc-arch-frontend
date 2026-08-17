@@ -8,3 +8,6 @@ coverage
 .env.*
 docs
 specs
+.playwright-mcp
+@mf-types
+.vercel
