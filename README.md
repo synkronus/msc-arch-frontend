@@ -87,6 +87,16 @@ pnpm --filter @smartgarage/shell dev    # → http://localhost:5000
 
 Remote URLs come from `VITE_REMOTE_CLIENTE` / `VITE_REMOTE_TALLER` (see `apps/shell/.env.example`; localhost previews are the fallback). Each remote also still runs standalone.
 
+### Live URLs (three independent Vercel projects)
+
+| App | URL |
+|---|---|
+| shell (host) | https://smart-garage-shell.vercel.app |
+| cliente (remote) | https://smart-garage-latam.vercel.app |
+| taller (remote) | https://smart-garage-workshop.vercel.app |
+
+Remotes serve `remoteEntry.js` as `application/javascript` with `Access-Control-Allow-Origin: *` and `Cache-Control: must-revalidate`, so redeploying a remote is picked up by the shell with no code change. The shell is deployed via Vercel's **prebuilt** flow (`vercel build --prod` with the prod remote URLs baked in, then `vercel deploy --prebuilt --prod`).
+
 ## CI
 
 `.github/workflows/ci.yml` runs on every push and pull_request: install (frozen lockfile) → typecheck → test → build.
